@@ -22,4 +22,8 @@ RUN /install-chrome.sh && \
 
 COPY rootfs/ /
 
+RUN /fix-permissions.sh
+
 VOLUME /config
+
+USER 1001

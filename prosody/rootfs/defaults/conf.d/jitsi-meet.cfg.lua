@@ -28,7 +28,7 @@ unlimited_jids = {
     "{{ .Env.JVB_AUTH_USER }}@{{ .Env.XMPP_AUTH_DOMAIN }}"
 }
 
-plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom" }
+plugin_paths = { "/prosody-plugins", "/prosody-plugins-custom" }
 
 muc_mapper_domain_base = "{{ .Env.XMPP_DOMAIN }}";
 muc_mapper_domain_prefix = "{{ $XMPP_MUC_DOMAIN_PREFIX }}";

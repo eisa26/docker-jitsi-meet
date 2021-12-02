@@ -25,6 +25,7 @@ fi
 [ -z "$(lsmod | grep -om1 snd_aloop)" ] \
 && ( echo -e "\e[31mERROR: Please load snd-aloop module on the docker host.\e[39m"; kill 1; exit 1 )
 
+# TODO Fix this for OpenShift
 # get host's audio group id
 host_audio_group="$(stat -c %g /dev/snd/pcmC0D0p 2>/dev/null)"
 
@@ -53,10 +54,8 @@ tpl /defaults/xorg-video-dummy.conf > /etc/jitsi/jibri/xorg-video-dummy.conf
 
 # make recording dir
 [ -z "${JIBRI_RECORDING_DIR}" ] && export JIBRI_RECORDING_DIR=/config/recordings
-mkdir -p ${JIBRI_RECORDING_DIR}
-chown -R jibri ${JIBRI_RECORDING_DIR}
+mkdir -pm 770 ${JIBRI_RECORDING_DIR}
 
 # make logs dir
 [ -z "${JIBRI_LOGS_DIR}" ] && export JIBRI_LOGS_DIR=/config/logs
-mkdir -p ${JIBRI_LOGS_DIR}
-chown -R jibri ${JIBRI_LOGS_DIR}
+mkdir -pm 770 ${JIBRI_LOGS_DIR}

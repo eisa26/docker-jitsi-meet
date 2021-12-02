@@ -1,4 +1,3 @@
 #!/bin/bash
 
 exec frep $1:-
-

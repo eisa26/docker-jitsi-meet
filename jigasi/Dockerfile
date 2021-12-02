@@ -22,4 +22,8 @@ RUN mkdir -p /usr/share/man/man1 && \
 
 COPY rootfs/ /
 
+RUN /fix-permissions.sh
+
 VOLUME ["/config", "/tmp/transcripts"]
+
+USER 1001

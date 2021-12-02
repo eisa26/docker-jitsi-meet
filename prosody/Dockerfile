@@ -28,6 +28,8 @@ ENV XMPP_CROSS_DOMAIN="false"
 
 ARG VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN="1.7.0"
 
+COPY rootfs/ /
+
 RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody-debian-packages.key && \
     echo "deb http://packages.prosody.im/debian bullseye main" > /etc/apt/sources.list.d/prosody.list && \
     apt-dpkg-wrap apt-get update && \
@@ -50,17 +52,28 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     apt-cleanup && \
     rm -rf /tmp/pkg /var/cache/apt && \
     patch -d /usr/lib/prosody/modules/muc -p0 < /prosody-plugins/muc_owner_allow_kick.patch && \
+    patch -d /usr/bin -p1 < /prosodyctl-certdir-permission-fix.patch && \
     wget https://github.com/matrix-org/prosody-mod-auth-matrix-user-verification/archive/refs/tags/v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz && \
     tar -xf v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz && \
     mv prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN/mod_auth_matrix_user_verification.lua /prosody-plugins && \
     mv prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN/mod_matrix_power_sync.lua /prosody-plugins && \
     rm -rf prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz
 
-COPY rootfs/ /
-
 COPY --from=builder /usr/local/lib/lua /usr/local/lib/lua
 COPY --from=builder /usr/local/share/lua /usr/local/share/lua
+
+# Apply config
+RUN echo "TLS_REQCERT allow" >> /etc/ldap/ldap.conf
+
+# Fix permissions
+RUN \
+  /fix-permissions.sh && \
+  touch /etc/saslauthd.conf && \
+  chmod g=u -R /prosody-plugins /etc/saslauthd.conf && \
+  chgrp -R root /etc/sasldb2 /run/saslauthd
 
 EXPOSE 5222 5347 5280
 
 VOLUME ["/config", "/prosody-plugins-custom"]
+
+USER 1001
